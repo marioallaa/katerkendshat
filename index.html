@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="sq">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Klasifikuesi i Katërkëndëshit</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Mëso dhe luaj për katërkëndëshat. Flowchart edukativ dhe kuiz 60-sekondësh me klasifikim.">
+  <meta name="author" content="Sh. M. B. Isak Alla">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Klasifikuesi i Katërkëndëshit">
+  <meta property="og:description" content="Mëso dhe luaj për katërkëndëshat me lojë interaktive.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://dummyimage.com/600x400/0b1020/ffffff&text=Katerkendeshat">
+  <meta property="og:url" content="https://example.com">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="brand">
+      <div class="logo">Q4</div>
+      <h1>Katërkëndëshat</h1>
+    </div>
+    <nav class="nav-actions">
+      <button id="mesoBtn" class="btn btn-tab">MESO</button>
+      <button id="lojaBtn" class="btn btn-tab">LOJA</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="gameArea" class="card"></section>
+
+    <section id="leaderboard" class="card hidden">
+      <h2 class="section-title">Klasifikimi</h2>
+      <table class="table">
+        <thead><tr><th>#</th><th>Emri</th><th>Pikët</th></tr></thead>
+        <tbody id="leaderboardBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Sh. M. B. Isak Alla</p>
+  </footer>
+
+  <!-- Modal emri -->
+  <div id="nameModal" class="modal hidden">
+    <div class="modal-content">
+      <h2 class="modal-title">Vendos emrin</h2>
+      <input type="text" id="playerNameInput" placeholder="Emri yt" />
+      <div class="modal-actions">
+        <button id="startQuizBtn" class="btn">Fillo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <script src="game.js"></script>
+</body>
+</html>

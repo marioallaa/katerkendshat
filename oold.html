@@ -1,0 +1,361 @@
+
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Klasifikuesi i Katërkëndëshit</title>
+<style>
+  :root{
+    --bg: #0b1020;
+    --card:#121a33;
+    --muted:#7e8bb6;
+    --text:#eaf0ff;
+    --accent:#6ea8fe;
+    --ok:#22c55e;
+    --no:#f97316;
+    --ring:#2a3768;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    color:var(--text); background: radial-gradient(1200px 600px at 20% -10%, #1a2550 0, transparent 60%), var(--bg);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .app{width:100%; max-width:920px}
+  .hero{
+    display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:16px;
+  }
+  .brand{display:flex; gap:12px; align-items:center}
+  .logo{
+    width:44px; height:44px; border-radius:12px;
+    background: linear-gradient(135deg, #5b8cff, #7ef0ff);
+    display:grid; place-items:center; color:#0a1022; font-weight:800;
+    box-shadow: 0 10px 30px rgba(110,168,254,.35);
+  }
+  .title{line-height:1.15; margin:0}
+  .subtitle{margin:0; color:var(--muted); font-size:0.95rem}
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:20px; padding:18px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.45);
+    backdrop-filter: blur(8px);
+  }
+  .progress{
+    height:10px; width:100%; background:#0e1530; border-radius:999px; overflow:hidden; border:1px solid #15214a;
+    margin:8px 0 18px;
+  }
+  .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#93e4ff); transition:width .5s ease}
+  .question{
+    font-size:1.25rem; line-height:1.35; margin:6px 0 14px;
+  }
+  .choices{display:flex; gap:12px; flex-wrap:wrap}
+  .btn{
+    appearance:none; border:1px solid transparent; cursor:pointer; font-weight:700;
+    padding:12px 16px; border-radius:12px; transition: transform .08s ease, background .2s ease, border-color .2s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-yes{background:rgba(34,197,94,.12); color:#aaf7c8; border-color:rgba(34,197,94,.35)}
+  .btn-no{background:rgba(249,115,22,.12); color:#ffd7bf; border-color:rgba(249,115,22,.35)}
+  .btn-neutral{background:#101938; color:#dbe5ff; border-color:#2a3768}
+  .pill{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+    background:#0f1836; border:1px solid #26356a; color:#c9d6ff; font-size:.9rem;
+  }
+  .stat{display:flex; gap:10px; flex-wrap:wrap}
+  .shape-wrap{
+    display:grid; grid-template-columns: 1fr; gap:16px; margin-top:10px;
+  }
+  .result{
+    display:grid; gap:12px; align-items:start;
+  }
+  .shape-canvas{
+    width:100%; aspect-ratio: 16/10; background:#0c132b; border:1px solid #1e2a56; border-radius:16px;
+    display:grid; place-items:center; position:relative; overflow:hidden;
+  }
+  .shape-canvas svg{width:78%; height:auto; filter: drop-shadow(0 10px 24px rgba(90,140,255,.35))}
+  .tag{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:12px;
+    background:#0f1836; border:1px dashed #2d3a6e; color:#cfe0ff; font-size:.9rem;
+  }
+  .grid{
+    display:grid; grid-template-columns: 1.2fr .8fr; gap:16px;
+  }
+  @media (max-width: 820px){
+    .grid{grid-template-columns: 1fr}
+    .hero{flex-direction:column; align-items:flex-start}
+  }
+  /* confetti */
+  .confetti{
+    pointer-events:none; position:fixed; inset:0; overflow:hidden; z-index:50;
+  }
+  .piece{
+    position:absolute; width:10px; height:14px; background:linear-gradient(135deg,#7ef0ff,#6ea8fe);
+    opacity:.9; border-radius:3px; animation: fall 1.4s ease-out forwards;
+  }
+  @keyframes fall{
+    to{ transform: translateY(110vh) rotate(340deg); opacity:.2}
+  }
+  .fade-in{animation:fade .35s ease}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="hero">
+      <div class="brand">
+        <div class="logo">Q4</div>
+        <div>
+          <h1 class="title">Klasifikuesi i Katërkëndëshit</h1>
+          <p class="subtitle">Përgjigju pyetjeve dhe zbulo llojin e figurës. (PO/JO)</p>
+        </div>
+      </div>
+      <div class="stat">
+        <span class="pill" id="xp">XP: 0</span>
+        <span class="pill" id="streak">Seri: 0</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left: gameplay -->
+      <section class="card fade-in" id="game">
+        <div class="progress" aria-label="Progresi"><div class="bar" id="bar"></div></div>
+        <div id="step" class="question">Gati?</div>
+        <div class="choices">
+          <button class="btn btn-yes" id="yesBtn">PO</button>
+          <button class="btn btn-no" id="noBtn">JO</button>
+          <button class="btn btn-neutral" id="restartBtn" title="Rifillo">↻ Rifillo</button>
+        </div>
+      </section>
+
+      <!-- Right: result/shape -->
+      <section class="card fade-in result" id="result" hidden>
+        <div class="shape-wrap">
+          <div class="shape-canvas" id="canvas" aria-label="Figura e gjetur"></div>
+          <div class="tag" id="nameTag">—</div>
+          <div class="tag" id="descTag">—</div>
+          <div class="choices">
+            <button class="btn btn-neutral" id="againBtn">Luaj Sërish</button>
+            <button class="btn btn-yes" id="shareBtn">Shpërndaj</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+<script>
+/* --- Flow definition (mirrors your diagram) --- */
+const QUESTIONS = {
+  Q1: { text: "A ka katërkëndëshi dy çifte brinjësh paralele?",
+        yes: "Q2A", no: "Q1B" },
+  Q1B:{ text: "A ka katërkëndëshi një çift brinjësh paralele?",
+        yes: "E", no: "F" },
+  Q2A:{ text: "A kanë të gjitha brinjët të njëjtën gjatësi?",
+        yes: "Q3A", no: "Q4A" },
+  Q3A:{ text: "A janë të gjithë këndet të barabarta me 90°?",
+        yes: "A", no: "B" },
+  Q4A:{ text: "A janë të gjithë këndet të barabarta me 90°?",
+        yes: "C", no: "D" },
+};
+
+const RESULTS = {
+  A: { name:"Katror (Square)",
+       desc:"Dy çifte brinjësh paralele, të gjitha brinjët të barabarta dhe të gjithë këndet 90°.",
+       draw: drawSquare },
+  B: { name:"Romb (Rhombus)",
+       desc:"Dy çifte brinjësh paralele, të gjitha brinjët të barabarta, kënde jo domosdoshmërisht 90°.",
+       draw: drawRhombus },
+  C: { name:"Drejtkëndësh (Rectangle)",
+       desc:"Dy çifte brinjësh paralele, kënde 90°, brinjët përballë me gjatësi të barabartë.",
+       draw: drawRectangle },
+  D: { name:"Paralelogram (Parallelogram)",
+       desc:"Dy çifte brinjësh paralele, pa kënde të gjitha 90° dhe jo të gjitha brinjët të barabarta.",
+       draw: drawParallelogram },
+  E: { name:"Trapéz (Trapezoid)",
+       desc:"Një çift i vetëm brinjësh paralele.",
+       draw: drawTrapezoid },
+  F: { name:"Katërkëndësh i zakonshëm",
+       desc:"Asnjë çift brinjësh paralele.",
+       draw: drawGeneralQuad },
+};
+
+let state = {
+  node: "Q1",
+  steps: 0,
+  xp: 0,
+  streak: 0,
+};
+
+const els = {
+  step: document.getElementById("step"),
+  yes: document.getElementById("yesBtn"),
+  no: document.getElementById("noBtn"),
+  restart: document.getElementById("restartBtn"),
+  bar: document.getElementById("bar"),
+  result: document.getElementById("result"),
+  game: document.getElementById("game"),
+  canvas: document.getElementById("canvas"),
+  nameTag: document.getElementById("nameTag"),
+  descTag: document.getElementById("descTag"),
+  again: document.getElementById("againBtn"),
+  share: document.getElementById("shareBtn"),
+  xp: document.getElementById("xp"),
+  streak: document.getElementById("streak"),
+  confetti: document.getElementById("confetti"),
+};
+
+function setProgress(pct){
+  els.bar.style.width = `${pct}%`;
+}
+
+function start(){
+  state.node = "Q1";
+  state.steps = 0;
+  setProgress(0);
+  els.result.hidden = true;
+  els.game.hidden = false;
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const node = state.node;
+  const q = QUESTIONS[node];
+  if(!q){
+    // reached a result
+    showResult(node);
+    return;
+  }
+  els.step.textContent = q.text;
+  const totalPath = 3; // max questions to result along the PO branch
+  const pct = Math.min(100, Math.round((state.steps/totalPath)*100));
+  setProgress(pct);
+}
+
+function answer(choice){
+  const q = QUESTIONS[state.node];
+  if(!q) return;
+  state.steps++;
+  state.node = (choice === "yes") ? q.yes : q.no;
+  renderQuestion();
+}
+
+function showResult(code){
+  const r = RESULTS[code];
+  if(!r) return;
+  // gamify: grant XP & streak
+  const gained = 25 + Math.max(0, (3 - state.steps))*5;
+  state.xp += gained;
+  state.streak += 1;
+
+  els.xp.textContent = `XP: ${state.xp}`;
+  els.streak.textContent = `Seri: ${state.streak}`;
+  setProgress(100);
+  els.game.hidden = true;
+  els.result.hidden = false;
+
+  els.nameTag.textContent = r.name;
+  els.descTag.textContent = r.desc;
+  // clear canvas then draw
+  els.canvas.innerHTML = "";
+  const svg = r.draw();
+  els.canvas.appendChild(svg);
+  boom();
+}
+
+els.yes.addEventListener("click", ()=>answer("yes"));
+els.no.addEventListener("click", ()=>answer("no"));
+els.restart.addEventListener("click", start);
+els.again.addEventListener("click", start);
+els.share.addEventListener("click", async ()=>{
+  const txt = `Zbulova: ${els.nameTag.textContent} — me Klasifikuesin e Katërkëndëshit.`;
+  if(navigator.share){
+    try{ await navigator.share({text:txt, title:"Klasifikuesi i Katërkëndëshit"});}catch{}
+  }else{
+    navigator.clipboard?.writeText(txt);
+    els.share.textContent = "Kopjuar!";
+    setTimeout(()=> els.share.textContent = "Shpërndaj", 1300);
+  }
+});
+
+/* --- Confetti --- */
+function boom(){
+  els.confetti.innerHTML = "";
+  const n = 60;
+  for(let i=0;i<n;i++){
+    const d = document.createElement("div");
+    d.className = "piece";
+    d.style.left = Math.random()*100 + "vw";
+    d.style.top = (-10 - Math.random()*20) + "vh";
+    d.style.transform = `rotate(${Math.random()*360}deg)`;
+    d.style.animationDelay = (Math.random()*0.35) + "s";
+    d.style.background = Math.random()>.5
+      ? "linear-gradient(135deg,#a0ffb3,#22c55e)"
+      : "linear-gradient(135deg,#7ef0ff,#6ea8fe)";
+    els.confetti.appendChild(d);
+  }
+  setTimeout(()=> els.confetti.innerHTML="", 1800);
+}
+
+/* --- SVG drawings (“photos”) --- */
+function baseSvg(){
+  const NS = "http://www.w3.org/2000/svg";
+  const s = document.createElementNS(NS,"svg");
+  s.setAttribute("viewBox","0 0 100 70");
+  const grid = document.createElementNS(NS,"rect");
+  grid.setAttribute("x","0"); grid.setAttribute("y","0"); grid.setAttribute("width","100"); grid.setAttribute("height","70");
+  grid.setAttribute("rx","10"); grid.setAttribute("fill","url(#bg)");
+  const defs = document.createElementNS(NS,"defs");
+  const lg = document.createElementNS(NS,"linearGradient");
+  lg.setAttribute("id","bg"); lg.setAttribute("x1","0"); lg.setAttribute("x2","0"); lg.setAttribute("y1","0"); lg.setAttribute("y2","1");
+  const s1 = document.createElementNS(NS,"stop"); s1.setAttribute("offset","0%"); s1.setAttribute("stop-color","#0c1430");
+  const s2 = document.createElementNS(NS,"stop"); s2.setAttribute("offset","100%"); s2.setAttribute("stop-color","#0a1128");
+  lg.appendChild(s1); lg.appendChild(s2); defs.appendChild(lg);
+  s.appendChild(defs); s.appendChild(grid);
+  return {s, NS};
+}
+function strokeShape(s, pts, closed=true){
+  const p = document.createElementNS(s.NS,"polyline");
+  p.setAttribute("points", pts.map(([x,y])=>`${x},${y}`).join(" "));
+  p.setAttribute("fill", closed ? "rgba(110,168,254,.22)" : "none");
+  p.setAttribute("stroke", "#7ef0ff");
+  p.setAttribute("stroke-width", "2.2");
+  p.setAttribute("stroke-linejoin","round");
+  p.setAttribute("stroke-linecap","round");
+  s.s.appendChild(p);
+  return s.s;
+}
+
+function drawSquare(){
+  const s = baseSvg();
+  return strokeShape(s, [[30,20],[70,20],[70,60],[30,60],[30,20]]);
+}
+function drawRectangle(){
+  const s = baseSvg();
+  return strokeShape(s, [[20,25],[80,25],[80,55],[20,55],[20,25]]);
+}
+function drawRhombus(){
+  const s = baseSvg();
+  return strokeShape(s, [[25,40],[45,20],[75,40],[55,60],[25,40]]);
+}
+function drawParallelogram(){
+  const s = baseSvg();
+  return strokeShape(s, [[25,25],[80,25],[60,55],[5,55],[25,25]]);
+}
+function drawTrapezoid(){
+  const s = baseSvg();
+  return strokeShape(s, [[25,25],[75,25],[65,55],[15,55],[25,25]]);
+}
+function drawGeneralQuad(){
+  const s = baseSvg();
+  return strokeShape(s, [[20,30],[78,22],[65,60],[10,50],[20,30]]);
+}
+
+/* init */
+start();
+</script>
+</body>
+</html>
